@@ -2,39 +2,36 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { useState } from "react";
 import { coverUrl } from "../src/api/openLibrary";
 import { useThemeStore } from "../src/store/useThemeStore";
+import { Ionicons } from "@expo/vector-icons";
 
-interface CourseCardProps {
-  item: any;
-  onPress: () => void;
-   icon?: React.ReactNode;      // optional icon (like the heart button)
-  darkMode?: boolean; 
-}
-
-export default function CourseCard({ item, onPress }: CourseCardProps) {
+export default function CourseCard({ item, onPress, icon }: any) {
   const [saved, setSaved] = useState(false);
   const darkMode = useThemeStore((s) => s.darkMode);
 
-  // Dynamic colors based on theme
   const colors = {
-    card: darkMode ? "#1e1e1e" : "#fff",
-    text: darkMode ? "#f5f5f5" : "#000",
-    meta: darkMode ? "#f5f5f5" : "#666",
-    saveBtn: darkMode ? "#333" : "#f2f2f2",
-    saveBtnActive: "#4CAF50",
-    saveBtnText: darkMode ? "#fff" : "#000",
-    imageBg: darkMode ? "#333" : "#eee",
+    card: darkMode ? "#1A1A1D" : "#ffffff",
+    text: darkMode ? "#f5f5f5" : "#1a1a1a",
+    meta: darkMode ? "#d1d1d1" : "#555",
+    saveBtn: darkMode ? "#2d2d31" : "#f1f1f1",
+    saveBtnActive: "#34c759",
+    imageBg: darkMode ? "#2a2a2d" : "#ddd",
+    border: darkMode ? "#2c2c2c" : "#e6e6e6",
   };
 
   return (
-    <TouchableOpacity style={[styles.card, { backgroundColor: colors.card }]} onPress={onPress}>
-      {/* Book Cover */}
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+      activeOpacity={0.9}
+      onPress={onPress}
+    >
+      {/* Cover Image */}
       <Image
         source={{ uri: coverUrl(item.cover_i, "M") || undefined }}
         style={[styles.image, { backgroundColor: colors.imageBg }]}
       />
 
-      {/* Text Content */}
-      <View style={styles.infoBox}>
+      {/* Content */}
+      <View style={styles.content}>
         <Text numberOfLines={2} style={[styles.title, { color: colors.text }]}>
           {item.title}
         </Text>
@@ -47,18 +44,25 @@ export default function CourseCard({ item, onPress }: CourseCardProps) {
           Published: {item.first_publish_year || "N/A"}
         </Text>
 
-        {/* Save Button */}
-        <TouchableOpacity
-          style={[
-            styles.saveBtn,
-            { backgroundColor: saved ? colors.saveBtnActive : colors.saveBtn },
-          ]}
-          onPress={() => setSaved(!saved)}
-        >
-          <Text style={[styles.saveBtnText, { color: colors.saveBtnText }]}>
-            {saved ? "Saved ✓" : "Save"}
-          </Text>
-        </TouchableOpacity>
+        {/* Save + Heart Row */}
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[
+              styles.saveBtn,
+              { backgroundColor: saved ? colors.saveBtnActive : colors.saveBtn },
+            ]}
+            onPress={() => setSaved(!saved)}
+          >
+            <Text style={[styles.saveBtnText, { color: saved ? "#fff" : colors.text }]}>
+              {saved ? "Saved ✓" : "Save"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Heart / Fav Icon */}
+          <View style={styles.heartWrapper}>
+            {icon /* heart from HomeScreen */}
+          </View>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -67,46 +71,62 @@ export default function CourseCard({ item, onPress }: CourseCardProps) {
 const styles = StyleSheet.create({
   card: {
     width: "100%",
-    borderRadius: 10,
-    padding: 10,
-    marginVertical: 8,
-    elevation: 4,
+    borderRadius: 18,
+    padding: 14,
+    marginVertical: 12,
+    borderWidth: 1,
+    elevation: 5,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
   },
 
   image: {
     width: "100%",
-    height: 300,
-    borderRadius: 8,
-    marginBottom: 10,
+    height: 220,
+    borderRadius: 15,
+    marginBottom: 14,
   },
 
-  infoBox: {
-    alignItems: "flex-start",
+  content: {
+    paddingHorizontal: 4,
   },
 
   title: {
+    fontSize: 18,
     fontWeight: "700",
-    fontSize: 16,
     marginBottom: 4,
+    letterSpacing: 0.3,
   },
 
   meta: {
-    fontSize: 13,
+    fontSize: 14,
     marginBottom: 3,
+    opacity: 0.8,
+  },
+
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
   },
 
   saveBtn: {
-    marginTop: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 10,
   },
 
   saveBtnText: {
-    fontWeight: "500",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  heartWrapper: {
+    padding: 8,
+    borderRadius: 50,
+    backgroundColor: "transparent",
   },
 });

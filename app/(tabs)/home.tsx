@@ -32,7 +32,7 @@ export default function HomeScreen() {
         title: doc.title || "Untitled",
         cover_i: doc.cover_i,
         author_name: doc.author_name || ["Unknown Author"],
-       first_publish_year: doc.first_publish_year || "N/A",
+        first_publish_year: doc.first_publish_year || "N/A",
       }));
       setData(courses);
     } catch (err) {
@@ -51,16 +51,20 @@ export default function HomeScreen() {
   };
 
   const colors = darkMode
-    ? { background: "#121212", text: "#f5f5f5", card: "#1e1e1e", input: "#333", placeholder: "#aaa", button: "#0066ff", buttonText: "#fff", infoText: "#ccc" }
-    : { background: "#e6f0ff", text: "#333", card: "#fff", input: "#fff", placeholder: "#888", button: "#0066ff", buttonText: "#fff", infoText: "#555" };
+    ? { background: "#121212", text: "#f5f5f5", card: "#1e1e1e", input: "#222", placeholder: "#888", button: "#00bfff", buttonText: "#fff", infoText: "#ccc" }
+    : { background: "#f9faff", text: "#1a1a1a", card: "#ffffff", input: "#f1f1f1", placeholder: "#aaa", button: "#0077ff", buttonText: "#fff", infoText: "#555" };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
-      <View style={styles.header}>
+      
+      {/* Premium Header */}
+      <View style={[styles.header, { backgroundColor: colors.card }]}>
         <View style={styles.greetingWrapper}>
-          <Ionicons name="person-circle-outline" size={28} color={colors.button} />
-          <Text style={[styles.greeting, { color: colors.text }]}>Welcome, {user?.name || "Guest"}</Text>
+          <Ionicons name="person-circle-outline" size={32} color={colors.button} />
+          <View style={{ marginLeft: 10 }}>
+            <Text style={[styles.greeting, { color: colors.text }]}>Hello,</Text>
+            <Text style={[styles.username, { color: colors.text }]}>{user?.name || "Guest"}</Text>
+          </View>
         </View>
         <View style={styles.darkModeToggle}>
           <Ionicons name={darkMode ? "moon" : "sunny"} size={24} color={colors.text} />
@@ -68,21 +72,24 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Search Bar */}
-      <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
-        <Ionicons name="search-outline" size={22} color={colors.placeholder} style={{ marginRight: 8 }} />
+      {/* Premium Search Bar */}
+      <View style={[styles.searchContainer, { backgroundColor: colors.input }]}>
+        <Ionicons name="search-outline" size={22} color={colors.placeholder} style={{ marginRight: 10 }} />
         <TextInput
-          value={query} onChangeText={setQuery} placeholder="Search courses"
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search courses..."
+          placeholderTextColor={colors.placeholder}
           style={[styles.input, { color: colors.text }]}
-          onSubmitEditing={fetchData} placeholderTextColor={colors.placeholder}
+          onSubmitEditing={fetchData}
         />
-        <TouchableOpacity onPress={fetchData} style={[styles.searchButton, { backgroundColor: colors.button }]}>
-          <Text style={[styles.searchButtonText, { color: colors.buttonText }]}>Search</Text>
+        <TouchableOpacity style={[styles.searchButton, { backgroundColor: colors.button }]} onPress={fetchData}>
+          <Text style={[styles.searchButtonText, { color: colors.buttonText }]}>Go</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Info */}
-      {loading && <Text style={[styles.infoText, { color: colors.infoText }]}>Loading...</Text>}
+      {/* Info Messages */}
+      {loading && <Text style={[styles.infoText, { color: colors.infoText }]}>Loading courses...</Text>}
       {error && <Text style={[styles.infoText, { color: "red" }]}>{error}</Text>}
       {!loading && data.length === 0 && <Text style={[styles.infoText, { color: colors.infoText }]}>No courses found.</Text>}
 
@@ -106,7 +113,7 @@ export default function HomeScreen() {
             darkMode={darkMode}
           />
         )}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         showsVerticalScrollIndicator={false}
       />
     </View>
@@ -115,13 +122,43 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16, paddingTop: 60 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    borderRadius: 18,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
+  },
+
   greetingWrapper: { flexDirection: "row", alignItems: "center" },
-  greeting: { fontSize: 22, fontWeight: "700", marginLeft: 10 },
+  greeting: { fontSize: 16, fontWeight: "500" },
+  username: { fontSize: 20, fontWeight: "700" },
   darkModeToggle: { flexDirection: "row", alignItems: "center" },
-  searchContainer: { flexDirection: "row", marginBottom: 20, alignItems: "center", borderRadius: 12, paddingHorizontal: 10, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
-  input: { flex: 1, paddingVertical: 12, paddingHorizontal: 10, fontSize: 16 },
-  searchButton: { paddingVertical: 10, paddingHorizontal: 17, borderRadius: 8, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
-  searchButtonText: { fontWeight: "600", fontSize: 16 },
-  infoText: { textAlign: "center", marginVertical: 12, fontSize: 16 },
+
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+
+  input: { flex: 1, fontSize: 16 },
+  searchButton: { paddingVertical: 8, paddingHorizontal: 18, borderRadius: 10 },
+  searchButtonText: { fontWeight: "600", fontSize: 15 },
+
+  infoText: { textAlign: "center", fontSize: 15, marginVertical: 10 },
 });

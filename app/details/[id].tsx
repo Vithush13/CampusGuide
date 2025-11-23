@@ -1,10 +1,19 @@
-import { View, Text, Image, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { coverUrl } from "../../src/api/openLibrary";
 import { useFavStore } from "../../src/store/useFavStore";
 import axios from "axios";
-import { Ionicons } from "@expo/vector-icons"; // npm install @expo/vector-icons
+import { Ionicons } from "@expo/vector-icons";
+import { useThemeStore } from "../../src/store/useThemeStore";
 
 export default function DetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -15,6 +24,27 @@ export default function DetailsScreen() {
   const favs = useFavStore((s) => s.favs);
   const add = useFavStore((s) => s.addFav);
   const remove = useFavStore((s) => s.removeFav);
+
+  const darkMode = useThemeStore((s) => s.darkMode);
+
+  // THEME COLORS — all inside this ONE file
+  const theme = darkMode
+    ? {
+        background: "#121212",
+        card: "#1E1E1E",
+        text: "#FFFFFF",
+        description: "#CCCCCC",
+        favButtonAdd: "#3A6BFF",
+        favButtonRemove: "#FF4A4A",
+      }
+    : {
+        background: "#F0F4FF",
+        card: "#FFFFFF",
+        text: "#333333",
+        description: "#666666",
+        favButtonAdd: "#4B7BE5",
+        favButtonRemove: "#FF5C5C",
+      };
 
   const isFav = favs.some((f) => f.key === id);
 
@@ -35,15 +65,20 @@ export default function DetailsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#4B7BE5" />
+      <View
+        style={[styles.loaderContainer, { backgroundColor: theme.background }]}
+      >
+        <ActivityIndicator size="large" color={theme.favButtonAdd} />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.card}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.background }]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={[styles.card, { backgroundColor: theme.card }]}>
         <Image
           source={{
             uri: coverUrl(book?.covers?.[0], "L") || undefined,
@@ -51,10 +86,14 @@ export default function DetailsScreen() {
           style={styles.bookImage}
         />
 
-        <Text style={styles.title}>{book?.title}</Text>
+        <Text style={[styles.title, { color: theme.text }]}>
+          {book?.title}
+        </Text>
 
-        <Text style={styles.description}>
-          {book?.description?.value || book?.description || "No description available."}
+        <Text style={[styles.description, { color: theme.description }]}>
+          {book?.description?.value ||
+            book?.description ||
+            "No description available."}
         </Text>
 
         <TouchableOpacity
@@ -67,7 +106,14 @@ export default function DetailsScreen() {
                   cover_i: book.covers?.[0],
                 })
           }
-          style={[styles.favButton, { backgroundColor: isFav ? "#FF5C5C" : "#4B7BE5" }]}
+          style={[
+            styles.favButton,
+            {
+              backgroundColor: isFav
+                ? theme.favButtonRemove
+                : theme.favButtonAdd,
+            },
+          ]}
         >
           <Ionicons
             name={isFav ? "heart" : "heart-outline"}
@@ -88,16 +134,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#F0F4FF",
   },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F0F4FF",
   },
   card: {
-    backgroundColor: "white",
     borderRadius: 15,
     padding: 20,
     shadowColor: "#000",
@@ -117,13 +160,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#333",
     marginBottom: 10,
   },
   description: {
     fontSize: 16,
     lineHeight: 24,
-    color: "#666",
     marginBottom: 20,
   },
   favButton: {
@@ -132,7 +173,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 15,
     borderRadius: 12,
-    marginBottom: 50
+    marginBottom: 50,
   },
   favButtonText: {
     color: "white",
