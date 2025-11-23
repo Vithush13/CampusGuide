@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useAuthStore } from "../src/store/useAuthStore";
 import { useRouter } from "expo-router";
@@ -10,8 +20,18 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
   const register = useAuthStore((s) => s.register);
   const router = useRouter();
+
+  // Email & password validation
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidPassword = (password: string) => password.length >= 6;
+
+  const canRegister =
+    name.trim().length > 0 && isValidEmail(email) && isValidPassword(password);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -21,15 +41,18 @@ export default function Register() {
     if (!result.canceled) setAvatar(result.assets[0].uri);
   };
 
-  const handleRegister = () => {
-    if (!name || !email || !password) {
-      Alert.alert("Error", "All fields are required!");
-      return;
-    }
-    register(name, email, password, avatar || undefined);
+  const handleRegister = async () => {
+  if (!canRegister) return;
+
+  const success = await register(name, email, password, avatar || undefined); // await here
+  if (success) {
     Alert.alert("Success", "Registered successfully!");
-    router.replace("/profile");
-  };
+    router.replace("/profile"); // navigate only after registration is complete
+  } else {
+    Alert.alert("Error", "Registration failed");
+  }
+};
+
 
   return (
     <KeyboardAvoidingView
@@ -41,7 +64,11 @@ export default function Register() {
 
       <TouchableOpacity onPress={pickImage} style={styles.avatarWrapper}>
         <Image
-          source={avatar ? { uri: avatar } : require("../assets/images/default_avatar.png")}
+          source={
+            avatar
+              ? { uri: avatar }
+              : require("../assets/images/default_avatar.png")
+          }
           style={styles.avatar}
         />
         {!avatar && (
@@ -57,6 +84,7 @@ export default function Register() {
         onChangeText={setName}
         style={styles.input}
       />
+
       <TextInput
         placeholder="Email"
         value={email}
@@ -65,15 +93,43 @@ export default function Register() {
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-      />
+      {email.length > 0 && !isValidEmail(email) && (
+        <Text style={styles.errorText}>Enter a valid email address</Text>
+      )}
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+      <View style={{ width: "100%" }}>
+        <TextInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPassword}
+          style={styles.input}
+        />
+        <TouchableOpacity
+          onPress={() => setShowPassword(!showPassword)}
+          style={{ position: "absolute", right: 15, top: 15 }}
+        >
+          <Ionicons
+            name={showPassword ? "eye-off" : "eye"}
+            size={22}
+            color="#555"
+          />
+        </TouchableOpacity>
+      </View>
+      {password.length > 0 && !isValidPassword(password) && (
+        <Text style={styles.errorText}>
+          Password must be at least 6 characters
+        </Text>
+      )}
+
+      <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: canRegister ? "#0066ff" : "#aaa" },
+        ]}
+        disabled={!canRegister}
+        onPress={handleRegister}
+      >
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
 
@@ -89,7 +145,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 30,
-    backgroundColor: "#e0f2ff", // soft gradient feel
+    backgroundColor: "#e0f2ff",
     alignItems: "center",
   },
   title: {
@@ -145,7 +201,6 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
-    backgroundColor: "#0066ff",
     paddingVertical: 15,
     borderRadius: 12,
     marginTop: 8,
@@ -165,5 +220,11 @@ const styles = StyleSheet.create({
     color: "#0066ff",
     fontWeight: "600",
     fontSize: 16,
+  },
+  errorText: {
+    color: "red",
+    alignSelf: "flex-start",
+    marginBottom: 8,
+    marginLeft: 5,
   },
 });

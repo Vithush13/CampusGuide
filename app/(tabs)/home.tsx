@@ -16,7 +16,7 @@ export default function HomeScreen() {
   const removeFav = useFavStore((s) => s.removeFav);
   const darkMode = useThemeStore((s) => s.darkMode);
   const toggleDarkMode = useThemeStore((s) => s.toggleDarkMode);
-
+  const loadUser = useAuthStore((s) => s.loadUser);
   const [query, setQuery] = useState("");
   const [data, setData] = useState<CourseItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -49,6 +49,10 @@ export default function HomeScreen() {
     const exists = favs.find((f) => f.key === item.key);
     exists ? removeFav(item.key) : addFav(item);
   };
+
+   useEffect(() => {
+    loadUser(); // loads user from AsyncStorage
+  }, []);
 
   const colors = darkMode
     ? { background: "#121212", text: "#f5f5f5", card: "#1e1e1e", input: "#222", placeholder: "#888", button: "#00bfff", buttonText: "#fff", infoText: "#ccc" }

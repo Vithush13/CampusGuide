@@ -11,10 +11,12 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) return alert("All fields are required");
-    login(email);
+     const success = await login(email, password); // login checks AsyncStorage
+  if (success) {
     router.replace("./(tabs)/home");
+  }
   };
 
   return (
